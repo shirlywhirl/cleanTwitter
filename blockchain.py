@@ -67,9 +67,16 @@ class Unfollower():
 
     def block_followers(self):
         for follower_id in self.limit_handled(tweepy.Cursor(uf.api.followers_ids,id=self.target_user).items()):
-            print( "Blocking user: %s" %(follower_id) )
-            uf.api.create_block(follower_id)
-
+            try:
+                screen_name=uf.api.get_user(id=follower_id).screen_name 
+                print( "Blocking user: %s UserID: %s" %(screen_name,follower_id) )
+            except:
+                print("ERROR:  couldn't get screen name or follower_id")
+            
+            try:
+                uf.api.create_block(follower_id)
+            except:
+                print( "FAILED: Couldnt block user: %s UserID: %s" %(screen_name,follower_id) )
 
 
 if __name__ == "__main__":
