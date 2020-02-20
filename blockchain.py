@@ -50,7 +50,9 @@ class Unfollower():
         self.api = tweepy.API(auth, wait_on_rate_limit_notify=True, wait_on_rate_limit=True)
         try:
             self.me = self.api.me()
-            self.me = None  # only used to test access
+            #self.me = None  # only used to test access
+            self.followers=self.api.followers_ids(id=self.me.id)
+            self.friends=self.api.friends_ids(id=self.me.id)
         except tweepy.error.TweepError as e:
             print("Please check the authentication information:\n{}".format(e))
             self.api = None
@@ -66,16 +68,24 @@ class Unfollower():
                 return
 
     def block_followers(self):
-        for follower_id in self.limit_handled(tweepy.Cursor(uf.api.followers_ids,id=self.target_user).items()):
+        for follower_id in self.limit_handled(tweepy.Cursor(self.api.followers_ids,id=self.target_user).items()):
             try:
-                screen_name=uf.api.get_user(id=follower_id).screen_name 
+                screen_name=self.api.get_user(id=follower_id).screen_name 
                 print( "Blocking user: %s UserID: %s" %(screen_name,follower_id) )
-            except:
+            except tweepy.error.TweepError:
                 print("ERROR:  couldn't get screen name or follower_id")
             
             try:
-                uf.api.create_block(follower_id)
-            except:
+                if follower_id not in self.followers:
+                    if follower_id not in self.friends:
+                        print( "> user: %s is  not a friend"%(screen_name) )
+                        self.api.create_block(follower_id)
+                        time.sleep(1)
+                    else:
+                        print( "> user: %s is a friend" %(screen_name) )
+                else:
+                    print( "> user: %s is a friend" %(screen_name) )
+            except tweepy.error.TweepError:
                 print( "FAILED: Couldnt block user: %s UserID: %s" %(screen_name,follower_id) )
 
 
@@ -83,6 +93,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Unlike or delete (re-)tweets (and optionally export them first). Set other parameters via configuration file (default: "settings.ini" in script directory) or arguments. Set arguments will overrule the configuration file.')
     parser.add_argument("--user", default=None, dest="target_user", help='Target user to block', type=str, action="store")
     args = parser.parse_args()
-    uf = Unfollower(args)
+    unfollower = Unfollower(args)
     if args.target_user:
-        uf.block_followers()
+        unfollower.block_followers()
