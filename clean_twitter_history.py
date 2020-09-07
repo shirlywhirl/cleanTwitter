@@ -94,29 +94,22 @@ class Unfollower():
     def unretweet(self):
         """ If the wtweet is a retweet will unretweet it """
         status = self.api.get_status(self.target_id, tweet_mode="extended")
-        ## Works!
-        #try:
-        #    print(status.retweeted_status.full_text)
-        #    print( "Is a retweet" )
-        #except AttributeError:  # Not a Retweet
-        #    print( "Is not a retweet" )
-        #    print(status.full_text)
-
         if hasattr(status, "retweeted_status"):  # Check if Retweet
             print( "Has attribute: retweeted_status" )
+            self.api.unretweet(self.target_id)
+            self.api.destroy_status(self.target_id)
         else:
             print( "does NOT have attribute: rewteeted_status" )
-            self.api.unretweet(id)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Unlike or delete (re-)tweets (and optionally export them first). Set other parameters via configuration file (default: "settings.ini" in script directory) or arguments. Set arguments will overrule the configuration file.')
     parser.add_argument("--user", default=None, dest="target_user", help='Target user to block', type=str, action="store")
-    parser.add_argument("--id", default=None, dest="target_id", help='Target id to delete if not retweet', type=str, action="store")
+    parser.add_argument("--unretweet", default=None, dest="target_id", help='Target id to delete if not retweet', type=str, action="store")
     parser.add_argument("--unfavorite", default=None, dest="target_id", help='Target id to delete if not retweet', type=str, action="store")
     args = parser.parse_args()
     unfollower = Unfollower(args)
     if args.target_user:
         unfollower.block_followers()
     if args.target_id:
-        unfollower.on_status()
+        unfollower.unretweet()
