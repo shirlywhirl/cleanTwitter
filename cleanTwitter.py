@@ -95,11 +95,11 @@ class Unfollower():
         """ If the wtweet is a retweet will unretweet it """
         status = self.api.get_status(self.target_id, tweet_mode="extended")
         if hasattr(status, "retweeted_status"):  # Check if Retweet
-            print( "Has attribute: retweeted_status" )
+            print( "%s Has attribute: retweeted_status" % (self.target_id) )
             self.api.unretweet(self.target_id)
             self.api.destroy_status(self.target_id)
         else:
-            print( "does NOT have attribute: rewteeted_status" )
+            print( "%s does NOT have attribute: rewteeted_status" % (self.target_id)  )
 
 
 if __name__ == "__main__":
