@@ -12,7 +12,7 @@ import tweepy
 import pprint
 
 
-class Unfollower():
+class TwitterClean():
     def __init__(self, args=None):
         self.script_dir = os.path.dirname(os.path.realpath(sys.argv[0]))
         self.config_path = os.path.join(self.script_dir, "settings.ini")
@@ -108,8 +108,8 @@ if __name__ == "__main__":
     parser.add_argument("--unretweet", default=None, dest="target_id", help='Target id to delete if not retweet', type=str, action="store")
     parser.add_argument("--unfavorite", default=None, dest="target_id", help='Target id to delete if not retweet', type=str, action="store")
     args = parser.parse_args()
-    unfollower = Unfollower(args)
+    twitter = TwitterClean(args)
     if args.target_user:
-        unfollower.block_followers()
+        twitter.block_followers()
     if args.target_id:
-        unfollower.unretweet()
+        twitter.unretweet()
