@@ -17,9 +17,6 @@ class TwitterClean():
         self.script_dir = os.path.dirname(os.path.realpath(sys.argv[0]))
         self.config_path = os.path.join(self.script_dir, "settings.ini")
         self.authenticate_from_config()  # check required settings first
-        if args:
-            self.target_user = args.target_user
-            self.target_id = args.target_id
 
     def authenticate_from_config(self, config_path=None):
         if config_path is not None:
@@ -69,8 +66,8 @@ class TwitterClean():
             except StopIteration:
                 return
 
-    def block_followers(self):
-        for follower_id in self.limit_handled(tweepy.Cursor(self.api.followers_ids,id=self.target_user).items()):
+    def block_followers(self,target_user):
+        for follower_id in self.limit_handled(tweepy.Cursor(self.api.followers_ids,id=target_user).items()):
             try:
                 screen_name=self.api.get_user(id=follower_id).screen_name 
                 print( "Blocking user: %s UserID: %s" %(screen_name,follower_id) )
@@ -91,25 +88,34 @@ class TwitterClean():
                 print( "FAILED: Couldnt block user: %s UserID: %s" %(screen_name,follower_id) )
 
 
-    def unretweet(self):
+    def unretweet(self,target_id):
         """ If the wtweet is a retweet will unretweet it """
-        status = self.api.get_status(self.target_id, tweet_mode="extended")
+        status = self.api.get_status(target_id, tweet_mode="extended")
         if hasattr(status, "retweeted_status"):  # Check if Retweet
-            print( "%s Has attribute: retweeted_status" % (self.target_id) )
-            self.api.unretweet(self.target_id)
-            self.api.destroy_status(self.target_id)
+            print( "%s Has attribute: retweeted_status" % (target_id) )
+            self.api.unretweet(target_id)
+            self.api.destroy_status(target_id)
         else:
-            print( "%s does NOT have attribute: rewteeted_status" % (self.target_id)  )
+            print( "%s does NOT have attribute: rewteeted_status" % (target_id)  )
+
+    def unlike(self,target_id):
+        """ unlike tweet """
+        try:
+            self.api.destroy_favorite(target_id)
+        except tweepy.error.TweepError as e:
+            print( "%s could not be unliked" % (target_id)  )
+
+
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Unlike or delete (re-)tweets (and optionally export them first). Set other parameters via configuration file (default: "settings.ini" in script directory) or arguments. Set arguments will overrule the configuration file.')
     parser.add_argument("--blockchain", default=None, dest="target_user", help='Target user to block followers', type=str, action="store")
-    parser.add_argument("--unretweet", default=None, dest="target_id", help='Target id to delete if not retweet', type=str, action="store")
-    parser.add_argument("--unfavorite", default=None, dest="target_id", help='Target id to delete if not retweet', type=str, action="store")
+    parser.add_argument("--unretweet", default=None, dest="tweet_id", help='Target id to delete if not retweet', type=str, action="store")
+    parser.add_argument("--unlike", default=None, dest="tweet_id", help='Target id to delete if not retweet', type=str, action="store")
     args = parser.parse_args()
     twitter = TwitterClean(args)
     if args.target_user:
-        twitter.block_followers()
-    if args.target_id:
-        twitter.unretweet()
+        twitter.block_followers(args.target_user)
+    if args.tweet_id:
+        twitter.unretweet(args.tweet_id)
