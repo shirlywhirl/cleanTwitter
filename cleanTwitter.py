@@ -103,7 +103,14 @@ class TwitterClean():
         try:
             self.api.destroy_favorite(target_id)
         except tweepy.error.TweepError as e:
-            print( "%s could not be unliked" % (target_id)  )
+            print( "%s could not be unliked,trying like/unlike" % (target_id)  )
+            try:
+                self.api.create_favorite(target_id)
+                self.api.destroy_favorite(target_id)
+                print( ">> %s likely unliked" % (target_id)  )
+            except:
+                print( ">> %s could not be unliked" % (target_id)  )
+                
 
 
 
@@ -111,11 +118,13 @@ class TwitterClean():
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Unlike or delete (re-)tweets (and optionally export them first). Set other parameters via configuration file (default: "settings.ini" in script directory) or arguments. Set arguments will overrule the configuration file.')
     parser.add_argument("--blockchain", default=None, dest="target_user", help='Target user to block followers', type=str, action="store")
-    parser.add_argument("--unretweet", default=None, dest="tweet_id", help='Target id to delete if not retweet', type=str, action="store")
-    parser.add_argument("--unlike", default=None, dest="tweet_id", help='Target id to delete if not retweet', type=str, action="store")
+    parser.add_argument("--unretweet", default=None, dest="untweet_id", help='Target id to delete if not retweet', type=str, action="store")
+    parser.add_argument("--unlike", default=None, dest="unlike_id", help='Target id to delete if not retweet', type=str, action="store")
     args = parser.parse_args()
     twitter = TwitterClean(args)
     if args.target_user:
         twitter.block_followers(args.target_user)
-    if args.tweet_id:
-        twitter.unretweet(args.tweet_id)
+    if args.untweet_id:
+        twitter.unretweet(args.untweet_id)
+    if args.unlike_id:
+        twitter.unlike(args.unlike_id)
