@@ -4,7 +4,8 @@
 import os
 import sys
 import argparse
-import datetime 
+#import datetime 
+from datetime import datetime, timedelta, time
 import configparser
 import time
 import json
@@ -110,7 +111,18 @@ class TwitterClean():
                 print( ">> %s likely unliked" % (target_id)  )
             except:
                 print( ">> %s could not be unliked" % (target_id)  )
-                
+
+    def unlike_old_tweets(self, max_age=30):
+        for favorite in tweepy.Cursor(self.api.favorites).items():
+            try: 
+                if favorite.created_at < datetime.now() - timedelta(days=max_age) :
+                    print( ">> %s unliking old tweet from %s" % (favorite.id,favorite.created_at) )
+                    self.unlike( favorite.id )
+                else:
+                    print( ">> %s keeping old tweet from %s" % (favorite.id,favorite.created_at) )
+                    
+            except:
+                print( ">> %s old tweet errored" % ( favorite.id ) )
 
 
 
@@ -120,6 +132,7 @@ if __name__ == "__main__":
     parser.add_argument("--blockchain", default=None, dest="target_user", help='Target user to block followers', type=str, action="store")
     parser.add_argument("--unretweet", default=None, dest="untweet_id", help='Target id to delete if not retweet', type=str, action="store")
     parser.add_argument("--unlike", default=None, dest="unlike_id", help='Target id to delete if not retweet', type=str, action="store")
+    parser.add_argument("--oldlikes", default=None, dest="old_likes_age", help='Tweets older then X days', type=int, action="store")
     args = parser.parse_args()
     twitter = TwitterClean(args)
     if args.target_user:
@@ -128,3 +141,6 @@ if __name__ == "__main__":
         twitter.unretweet(args.untweet_id)
     if args.unlike_id:
         twitter.unlike(args.unlike_id)
+    if args.old_likes_age:
+        twitter.unlike_old_tweets(args.old_likes_age)
+
