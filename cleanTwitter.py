@@ -113,19 +113,18 @@ class TwitterClean():
                 print( ">> %s could not be unliked" % (target_id)  )
 
     def unlike_old_tweets(self, max_age=30):
-        for favorite in tweepy.Cursor(self.api.favorites).items():
-            try: 
-                if favorite.created_at < datetime.now() - timedelta(days=max_age) :
-                    print( ">> %s unliking old tweet from %s" % (favorite.id,favorite.created_at) )
-                    self.unlike( favorite.id )
-                else:
-                    print( ">> %s keeping old tweet from %s" % (favorite.id,favorite.created_at) )
-                    
-            except:
-                print( ">> %s old tweet errored" % ( favorite.id ) )
-
-
-
+        for page in tweepy.Cursor(self.api.favorites).pages():
+            for favorite in page:
+              try: 
+                  if favorite.created_at < datetime.now() - timedelta(days=max_age) :
+                      print( ">> %s unliking old tweet from %s" % (favorite.id,favorite.created_at) )
+                      self.unlike( favorite.id )
+                  else:
+                      print( ">> %s keeping old tweet from %s" % (favorite.id,favorite.created_at) )
+                      
+              except:
+                  print( ">> %s old tweet errored" % ( favorite.id ) )
+  
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Unlike or delete (re-)tweets (and optionally export them first). Set other parameters via configuration file (default: "settings.ini" in script directory) or arguments. Set arguments will overrule the configuration file.')
