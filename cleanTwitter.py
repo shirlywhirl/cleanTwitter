@@ -120,7 +120,7 @@ class TwitterClean():
                       print( ">> %s unliking old tweet from %s" % (favorite.id,favorite.created_at) )
                       self.unlike( favorite.id )
                   else:
-                      print( ">> %s keeping old tweet from %s" % (favorite.id,favorite.created_at) )
+                      print( ">> %s keeping like on old tweet from %s" % (favorite.id,favorite.created_at) )
                       
               except:
                   print( ">> %s old tweet errored" % ( favorite.id ) )
