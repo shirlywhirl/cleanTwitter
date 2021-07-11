@@ -2,3 +2,5 @@
 *.out
 *.sh
 *.list
+*like*
+*.js
