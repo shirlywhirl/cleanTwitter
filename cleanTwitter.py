@@ -129,9 +129,9 @@ class TwitterClean():
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Unlike or delete (re-)tweets (and optionally export them first). Set other parameters via configuration file (default: "settings.ini" in script directory) or arguments. Set arguments will overrule the configuration file.')
     parser.add_argument("--blockchain", default=None, dest="target_user", help='Target user to block followers', type=str, action="store")
-    parser.add_argument("--unretweet", default=None, dest="untweet_id", help='Target id to delete if not retweet', type=str, action="store")
-    parser.add_argument("--unlike", default=None, dest="unlike_id", help='Target id to delete if not retweet', type=str, action="store")
-    parser.add_argument("--oldlikes", default=None, dest="old_likes_age", help='Tweets older then X days', type=int, action="store")
+    parser.add_argument("--unretweet", default=None, dest="untweet_id", help='Target id to delete if its a retweet', type=str, action="store")
+    parser.add_argument("--unlike", default=None, dest="unlike_id", help='Target id to delete if it was liked', type=str, action="store")
+    parser.add_argument("--oldlikes", default=None, dest="old_likes_age", help='Delete likes  older then X days', type=int, action="store")
     args = parser.parse_args()
     twitter = TwitterClean(args)
     if args.target_user:
