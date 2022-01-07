@@ -88,7 +88,6 @@ class TwitterClean():
             except tweepy.error.TweepError:
                 print( "FAILED: Couldnt block user: %s UserID: %s" %(screen_name,follower_id) )
 
-
     def unretweet(self,target_id):
         """ If the wtweet is a retweet will unretweet it """
         status = self.api.get_status(target_id, tweet_mode="extended")
@@ -113,7 +112,7 @@ class TwitterClean():
                 print( ">> %s could not be unliked" % (target_id)  )
 
     def unlike_old_tweets(self, max_age=30):
-        for page in tweepy.Cursor(self.api.favorites).pages():
+        for page in self.limit_handled( tweepy.Cursor(self.api.favorites).pages() ):
             for favorite in page:
               try: 
                   if favorite.created_at < datetime.now() - timedelta(days=max_age) :
@@ -129,9 +128,9 @@ class TwitterClean():
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Unlike or delete (re-)tweets (and optionally export them first). Set other parameters via configuration file (default: "settings.ini" in script directory) or arguments. Set arguments will overrule the configuration file.')
     parser.add_argument("--blockchain", default=None, dest="target_user", help='Target user to block followers', type=str, action="store")
-    parser.add_argument("--unretweet", default=None, dest="untweet_id", help='Target id to delete if its a retweet', type=str, action="store")
-    parser.add_argument("--unlike", default=None, dest="unlike_id", help='Target id to delete if it was liked', type=str, action="store")
-    parser.add_argument("--oldlikes", default=None, dest="old_likes_age", help='Delete likes  older then X days', type=int, action="store")
+    parser.add_argument("--unretweet", default=None, dest="untweet_id", help='Target id to delete if not retweet', type=str, action="store")
+    parser.add_argument("--unlike", default=None, dest="unlike_id", help='Target id to delete if not retweet', type=str, action="store")
+    parser.add_argument("--oldlikes", default=None, dest="old_likes_age", help='Tweets older then X days', type=int, action="store")
     args = parser.parse_args()
     twitter = TwitterClean(args)
     if args.target_user:
@@ -141,5 +140,4 @@ if __name__ == "__main__":
     if args.unlike_id:
         twitter.unlike(args.unlike_id)
     if args.old_likes_age:
-        twitter.unlike_old_tweets(args.old_likes_age)
-
+        twitter.unlike_old_tweets(max_age=args.old_likes_age)
