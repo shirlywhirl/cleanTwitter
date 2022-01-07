@@ -67,6 +67,23 @@ class TwitterClean():
             except StopIteration:
                 return
 
+    def block_user(self,follower_id,screen_name=None):
+        """ Block user itself """
+        try:
+            if follower_id not in self.followers:
+                if follower_id not in self.friends:
+                    print( "> user: %s is  not a friend"%(screen_name) )
+                    self.api.create_block(follower_id)
+                    print( "> user: %s is blocked"%(screen_name) )
+                    time.sleep(1)
+                else:
+                    print( "> user: %s is a friend" %(screen_name) )
+            else:
+                print( "> user: %s is a friend" %(screen_name) )
+        except tweepy.error.TweepError:
+            print( "FAILED: Couldnt block user: %s UserID: %s" %(screen_name,follower_id) )        
+
+
     def block_followers(self,target_user):
         for follower_id in self.limit_handled(tweepy.Cursor(self.api.followers_ids,id=target_user).items()):
             try:
@@ -74,19 +91,8 @@ class TwitterClean():
                 print( "Blocking user: %s UserID: %s" %(screen_name,follower_id) )
             except tweepy.error.TweepError:
                 print("ERROR:  couldn't get screen name or follower_id")
+            self.block_user( follower_id,screen_name)
             
-            try:
-                if follower_id not in self.followers:
-                    if follower_id not in self.friends:
-                        print( "> user: %s is  not a friend"%(screen_name) )
-                        self.api.create_block(follower_id)
-                        time.sleep(1)
-                    else:
-                        print( "> user: %s is a friend" %(screen_name) )
-                else:
-                    print( "> user: %s is a friend" %(screen_name) )
-            except tweepy.error.TweepError:
-                print( "FAILED: Couldnt block user: %s UserID: %s" %(screen_name,follower_id) )
 
     def unretweet(self,target_id):
         """ If the wtweet is a retweet will unretweet it """
@@ -127,14 +133,18 @@ class TwitterClean():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Unlike or delete (re-)tweets (and optionally export them first). Set other parameters via configuration file (default: "settings.ini" in script directory) or arguments. Set arguments will overrule the configuration file.')
-    parser.add_argument("--blockchain", default=None, dest="target_user", help='Target user to block followers', type=str, action="store")
+    parser.add_argument("--block", default=None, dest="target_user", help='Target user to block', type=str, action="store")
+    parser.add_argument("--blockchain", default=None, dest="target_user_chain", help='Target user to block followers', type=str, action="store")
     parser.add_argument("--unretweet", default=None, dest="untweet_id", help='Target id to delete if not retweet', type=str, action="store")
     parser.add_argument("--unlike", default=None, dest="unlike_id", help='Target id to delete if not retweet', type=str, action="store")
     parser.add_argument("--oldlikes", default=None, dest="old_likes_age", help='Tweets older then X days', type=int, action="store")
     args = parser.parse_args()
     twitter = TwitterClean(args)
     if args.target_user:
-        twitter.block_followers(args.target_user)
+        twitter.block_user(args.target_user,args.target_user)
+    if args.target_user_chain:
+        twitter.block_user(args.target_user_chain,args.target_user_chain)
+        twitter.block_followers(args.target_user_chain)
     if args.untweet_id:
         twitter.unretweet(args.untweet_id)
     if args.unlike_id:
