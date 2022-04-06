@@ -62,7 +62,7 @@ class TwitterClean:
             self.me = None
             self.followers = self.api.followers_ids(id=self.me.id)
             self.friends = self.api.friends_ids(id=self.me.id)
-        except tweepy.errors.TweepyException:
+        except tweepy.errors.TweepyException as e:
             print("Please check the authentication information:\n{}".format(e))
             self.api = None
             self.me = None
@@ -89,9 +89,9 @@ class TwitterClean:
                     print("> user: %s is a friend" % (screen_name))
             else:
                 print("> user: %s is a friend" % (screen_name))
-        except tweepy.errors.TweepyException:
+        except tweepy.errors.TweepyException as e:
             print(
-                "FAILED: Couldnt block user: %s UserID: %s" % (screen_name, follower_id)
+                "FAILED:%s:  --user: %s UserID: %s" % (e,screen_name, follower_id)
             )
 
     def block_followers(self, target_user):
