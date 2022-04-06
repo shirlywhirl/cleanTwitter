@@ -55,14 +55,14 @@ class TwitterClean:
         auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
         auth.set_access_token(access_token, access_token_secret)
         self.api = tweepy.API(
-            auth, wait_on_rate_limit_notify=True, wait_on_rate_limit=True
+            auth, wait_on_rate_limit=True
         )
         try:
-            self.me = self.api.me()
-            # self.me = None  # only used to test access
+            self.me = self.api.get_user(screen_name='jbarnope')
+            self.me = None
             self.followers = self.api.followers_ids(id=self.me.id)
             self.friends = self.api.friends_ids(id=self.me.id)
-        except tweepy.error.TweepError as e:
+        except tweepy.errors.TweepyException:
             print("Please check the authentication information:\n{}".format(e))
             self.api = None
             self.me = None
@@ -89,7 +89,7 @@ class TwitterClean:
                     print("> user: %s is a friend" % (screen_name))
             else:
                 print("> user: %s is a friend" % (screen_name))
-        except tweepy.error.TweepError:
+        except tweepy.errors.TweepyException:
             print(
                 "FAILED: Couldnt block user: %s UserID: %s" % (screen_name, follower_id)
             )
@@ -102,7 +102,7 @@ class TwitterClean:
                 screen_name = self.api.get_user(id=follower_id).screen_name
                 print("Blocking user: %s UserID: %s" % (screen_name, follower_id))
                 self.block_user(follower_id, screen_name)
-            except tweepy.error.TweepError:
+            except tweepy.errors.TweepyException:
                 print("ERROR:  couldn't get screen name or follower_id")
 
     def unretweet(self, target_id):
@@ -119,7 +119,7 @@ class TwitterClean:
         """unlike tweet"""
         try:
             self.api.destroy_favorite(target_id)
-        except tweepy.error.TweepError as e:
+        except tweepy.errors.TweepyException as e:
             print("%s could not be unliked,trying like/unlike" % (target_id))
             try:
                 self.api.create_favorite(target_id)

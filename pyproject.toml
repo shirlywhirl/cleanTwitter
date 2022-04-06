@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "cleantwitter"
+version = "0.1.0"
+description = "Utilizes the twitter API for tasks."
+authors = ["Justin Barnowski <jbarno54@gmail.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+tweepy = "^4.8.0"
+fire = "^0.4.0"
+
+[tool.poetry.dev-dependencies]
+pytest = "^7.1.1"
+pytest-sugar = "^0.9.4"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
