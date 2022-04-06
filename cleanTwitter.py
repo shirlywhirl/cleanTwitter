@@ -81,18 +81,17 @@ class TwitterClean():
             else:
                 print( "> user: %s is a friend" %(screen_name) )
         except tweepy.error.TweepError:
-            print( "FAILED: Couldnt block user: %s UserID: %s" %(screen_name,follower_id) )        
+            print( "FAILED: Couldnt block user: %s UserID: %s" %(screen_name,follower_id) )
 
 
     def block_followers(self,target_user):
         for follower_id in self.limit_handled(tweepy.Cursor(self.api.followers_ids,id=target_user).items()):
             try:
-                screen_name=self.api.get_user(id=follower_id).screen_name 
+                screen_name=self.api.get_user(id=follower_id).screen_name
                 print( "Blocking user: %s UserID: %s" %(screen_name,follower_id) )
+                self.block_user( follower_id,screen_name)
             except tweepy.error.TweepError:
                 print("ERROR:  couldn't get screen name or follower_id")
-            self.block_user( follower_id,screen_name)
-            
 
     def unretweet(self,target_id):
         """ If the wtweet is a retweet will unretweet it """
@@ -120,16 +119,15 @@ class TwitterClean():
     def unlike_old_tweets(self, max_age=30):
         for page in self.limit_handled( tweepy.Cursor(self.api.favorites).pages() ):
             for favorite in page:
-              try: 
+              try:
                   if favorite.created_at < datetime.now() - timedelta(days=max_age) :
                       print( ">> %s unliking old tweet from %s" % (favorite.id,favorite.created_at) )
                       self.unlike( favorite.id )
                   else:
                       print( ">> %s keeping like on old tweet from %s" % (favorite.id,favorite.created_at) )
-                      
               except:
                   print( ">> %s old tweet errored" % ( favorite.id ) )
-  
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Unlike or delete (re-)tweets (and optionally export them first). Set other parameters via configuration file (default: "settings.ini" in script directory) or arguments. Set arguments will overrule the configuration file.')
